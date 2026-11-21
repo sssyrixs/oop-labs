@@ -9,19 +9,19 @@ class Medicine {
     int day;            // номер дн€
 
 public:
-    // ќбычный конструктор
+    // обычн констр
     Medicine(std::string n, int d, std::string p);
 
-    // 1. ѕерегрузка конструктора: (объект, флаг копировать план?)
+    // перегруз констр
     Medicine(const Medicine& prev, bool copyPlan);
 
-    // 2. ѕерегрузка operator<<
+    // перегрузка оператор<< 
     friend std::ostream& operator<<(std::ostream& out, Medicine& obj);
 
-    // 3. ѕерегрузка operator[] Ч установка приЄма в заданное врем€
+    // перегруз оператор[] дл€ приема по заданному времени
     std::string& operator[](const std::string& time);
 
-    // 4. ѕерегрузка метода проверки: с параметром и без
-    bool check(const std::string& time) const;  // по конкретному времени
-    bool check() const;                          // факт == план за день
+    // перегруз метода проверки с параметром и без
+    bool check(const std::string& time) const;  // по конкр врем
+    bool check() const;                          // как по плану, так и по факту
 };
