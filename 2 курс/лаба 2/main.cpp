@@ -1,50 +1,57 @@
 ﻿#include <exception>
 #include <iostream>
+#include <windows.h>
 
 #include "medication_intake.h"
 #include "time_of_day.h"
 
 int main() {
+    SetConsoleOutputCP(1251);
+    SetConsoleCP(1251);
     try {
-        Medication_Intake medication("Aspirin", 100);
+        // день 1 обычный прием
+        Medication_Intake d1("Aspirin", 1);
+        d1.SetPlanForTime(TimeOfDay::kMorning, true);
+        d1.SetPlanForTime(TimeOfDay::kNoon, true);
+        d1.SetTakenForTime(TimeOfDay::kMorning, true);
+        d1.SetTakenForTime(TimeOfDay::kNoon, true);
 
-        medication.SetPlanForTime(TimeOfDay::kMorning, true);
-        medication.SetPlanForTime(TimeOfDay::kNoon, true);
-        medication.SetPlanForTime(TimeOfDay::kEvening, true);
+        std::cout << "=== день 1 (обычный) ===\n" << d1 << "\n";
 
-        medication.SetTakenForTime(TimeOfDay::kMorning, true);
-        medication.SetTakenForTime(TimeOfDay::kNoon, true);
-        medication.SetTakenForTime(TimeOfDay::kEvening, true);
+        // день 1 прием с пояснением
+        Detailed_Intake dd1("Aspirin", 1, "принимать до еды");
+        dd1.SetPlanForTime(TimeOfDay::kMorning, true);
+        dd1.SetPlanForTime(TimeOfDay::kNoon, true);
+        dd1.SetTakenForTime(TimeOfDay::kMorning, true);
+        dd1.SetTakenForTime(TimeOfDay::kNoon, true);
 
-        medication.PrintIntakeInfo();
+        std::cout << "=== день 1 (с пояснением) ===\n" << dd1 << "\n";
 
-        std::cout << "\nIntake needed at evening: " << (medication.IsIntakeNeeded(TimeOfDay::kEvening) ? "yes" : "no") << "\n";
+        // день 2 копия с планом
+        Detailed_Intake dd2(dd1, true);
+        dd2[TimeOfDay::kMorning] = true;
 
-        // проверка иск и неправильного ввода
-        try {
-            Medication_Intake bad_name("", 100);
-        }
-        catch (const std::exception& error) {
-            std::cout << "Error (empty name): " << error.what() << "\n";
-        }
+        std::cout << "=== день 2 (с пояснением, с планом) ===\n" << dd2 << "\n";
 
-        try {
-            Medication_Intake bad_day("Aspirin", 400);
-        }
-        catch (const std::exception& error) {
-            std::cout << "Error (bad day): " << error.what() << "\n";
-        }
+        // день 3 копия без плана
+        Detailed_Intake dd3(dd1, false);
 
-        try {
-            medication.SetTakenForTime(TimeOfDay::kAfternoon, true);
-        }
-        catch (const std::exception& error) {
-            std::cout << "Error (intake without plan): " << error.what() << "\n";
-        }
+        std::cout << "=== день 3 (с пояснением, без плана) ===\n" << dd3 << "\n";
 
+        // проверки
+        std::cout << "день 2: " << (dd2.check() ? "прием по плану" : "прием НЕ по плану") << "\n";
+        std::cout << "день 2 утро: " << (dd2.check(TimeOfDay::kMorning) ? "нужен прием" : "не нужен") << "\n";
+        std::cout << "пояснение день 2: " << dd2.GetNote() << "\n";
+
+        // проверка иск
+        try { Detailed_Intake bad("Aspirin", 1, ""); }
+        catch (const std::exception& e) { std::cout << "Error (empty note): " << e.what() << "\n"; }
+
+        try { dd1.SetNote(nullptr); }
+        catch (const std::exception& e) { std::cout << "Error (null note): " << e.what() << "\n"; }
     }
-    catch (const std::exception& error) {
-        std::cout << "Fatal: " << error.what() << "\n";
+    catch (const std::exception& e) {
+        std::cout << "Fatal: " << e.what() << "\n";
     }
 
     return 0;

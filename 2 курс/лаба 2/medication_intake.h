@@ -4,8 +4,8 @@
 
 #include "time_of_day.h"
 
-// класс дл€ хран инфы о прин€тых лекарствах и какеи нужно
-// динам массивы наименование, план приема, отметки приема.
+// класс дл€ хран инфы о прин€тых лекарствах и какие нужно
+// динам массивы наименование, план приема, отметки приема
 class Medication_Intake { // объ€вление типа
 public:
     static constexpr int kDosesPerDay = 5; // статик то что принадлежит классу
@@ -13,30 +13,69 @@ public:
     // конструкт с парам наименование лекарства и день приема  / проверка что всЄ ок, коп стр в дин пам€ть
     Medication_Intake(const char* const medication_name, int intake_day);
 
+    // перегруз конструкт: копируемый объект и флаг копировать ли план
+    Medication_Intake(const Medication_Intake& prev, bool copy_plan);
+
     // динам пам€т освоб
-    ~Medication_Intake();
+    virtual ~Medication_Intake(); // виртуальный тк есть наследник
 
     // без копировани€ тк динам пам€ть
     Medication_Intake(const Medication_Intake&) = delete;
     Medication_Intake& operator=(const Medication_Intake&) = delete;
 
-    // селекторы // TODO перенести реализации cpp
-    const char* GetMedicationName() const { return medication_name_; } // геттеры
-    int GetIntakeDay() const { return intake_day_; } 
+    // селекторы
+    const char* GetMedicationName() const; // геттеры
+    int GetIntakeDay() const;
 
     void SetPlanForTime(TimeOfDay time, bool is_planned); // сеттеры
-
     void SetTakenForTime(TimeOfDay time, bool is_taken);
 
     bool IsIntakeNeeded(TimeOfDay time) const;
-
     bool IsCompliantWithPlan() const;
 
-    void PrintIntakeInfo() const;
+    // перегруз метода проверки: с парам и без
+    bool check(TimeOfDay time) const; // по конкр вр
+    bool check() const;               // как по плану, так и по факту
 
-private:
-    char* medication_name_;   // динамическа€ пам€ть: наименование
+    // перегруз оператор[] дл€ приема по заданному времени
+    bool& operator[](TimeOfDay time);
+
+    // перегруз оператор<<
+    friend std::ostream& operator<<(std::ostream& out, const Medication_Intake& obj);
+
+    void PrintIntakeInfo() const; // печать инфы
+
+protected: // было private Ч дл€ доступа из наследника
+    char* medication_name_;   // динам пам€ть: наименование
     int intake_day_;          // номер дн€ с начала года
     bool* plan_;              // план приема
     bool* doses_taken_;       // фактический прием
+};
+
+class Detailed_Intake : public Medication_Intake { // наследование
+public:
+    // конструкт с парам: им€, день, по€снение
+    Detailed_Intake(const char* const medication_name, int intake_day, const char* const note);
+
+    // конструкт копи€ с флагом + по€снение из прошлого объекта
+    Detailed_Intake(const Detailed_Intake& prev, bool copy_plan);
+
+    // динам пам€т освоб
+    ~Detailed_Intake() override;
+
+    // без копировани€ тк динам пам€ть
+    Detailed_Intake(const Detailed_Intake&) = delete;
+    Detailed_Intake& operator=(const Detailed_Intake&) = delete;
+
+    // сеттер по€снени€
+    void SetNote(const char* const note);
+
+    // геттер по€снени€
+    const char* GetNote() const;
+
+    // перегруз оператор<< дл€ наследника
+    friend std::ostream& operator<<(std::ostream& out, const Detailed_Intake& obj);
+
+private:
+    char* note_; // по€снение к приему (строка в дин пам€ти)
 };
